@@ -1,0 +1,137 @@
+ # flipkart_delivery_system.py
+
+class Customer:
+    def __init__(self, customer_id, name, address):
+        self.customer_id = customer_id
+        self.name = name
+        self.address = address
+
+    def __str__(self):
+        return f"Customer(ID: {self.customer_id}, Name: {self.name}, Address: {self.address})"
+
+
+class Product:
+    def __init__(self, product_id, name, price):
+        self.product_id = product_id
+        self.name = name
+        self.price = price
+
+    def __str__(self):
+        return f"Product(ID: {self.product_id}, Name: {self.name}, Price: {self.price})"
+
+
+class Order:
+    def __init__(self, order_id, customer, product, quantity):
+        self.order_id = order_id
+        self.customer = customer
+        self.product = product
+        self.quantity = quantity
+        self.status = "Order Placed"
+
+    def get_order_details(self):
+        total_price = self.product.price * self.quantity
+        return {
+            "Order ID": self.order_id,
+            "Customer": str(self.customer),
+            "Product": str(self.product),
+            "Quantity": self.quantity,
+            "Total Price": total_price,
+            "Status": self.status
+        }
+
+    def update_status(self, new_status):
+        self.status = new_status
+
+
+class Delivery:
+    def __init__(self, order):
+        self.order = order
+        self.delivery_status = "Pending"
+
+    def dispatch(self):
+        self.delivery_status = "Dispatched"
+        print(f"Order {self.order.order_id} dispatched.")
+
+    def deliver(self):
+        self.delivery_status = "Delivered"
+        self.order.update_status("Delivered")
+        print(f"Order {self.order.order_id} delivered to {self.order.customer.name}.")
+
+
+class FlipkartDeliverySystem:
+    def __init__(self):
+        self.orders = []
+        self.customers = []
+        self.products = []
+
+    def add_customer(self, customer):
+        self.customers.append(customer)
+
+    def add_product(self, product):
+        self.products.append(product)
+
+    def place_order(self, customer_id, product_id, quantity):
+        customer = next((customer for customer in self.customers if customer.customer_id == customer_id), None)
+        product = next((product for product in self.products if product.product_id == product_id), None)
+
+        if not customer or not product:
+            print("Invalid customer or product details.")
+            return None
+
+        order_id = len(self.orders) + 1
+        order = Order(order_id, customer, product, quantity)
+        self.orders.append(order)
+        print(f"Order {order_id} placed successfully.")
+        return order
+
+    def track_order(self, order_id):
+        order = next((order for order in self.orders if order.order_id == order_id), None)
+        if order:
+            print("Order Details:")
+            for key, value in order.get_order_details().items():
+                print(f"{key}: {value}")
+        else:
+            print("Order not found.")
+
+    def start_delivery(self, order_id):
+        order = next((order for order in self.orders if order.order_id == order_id), None)
+        if order:
+            delivery = Delivery(order)
+            delivery.dispatch()
+            delivery.deliver()
+        else:
+            print("Order not found.")
+
+
+# Sample Usage
+def main():
+    system = FlipkartDeliverySystem()
+
+    # Adding customers
+    customer1 = Customer(1, "John Doe", "123, ABC Street, City")
+    customer2 = Customer(2, "Jane Smith", "456, XYZ Avenue, City")
+    system.add_customer(customer1)
+    system.add_customer(customer2)
+
+    # Adding products
+    product1 = Product(1, "Laptop", 50000)
+    product2 = Product(2, "Smartphone", 20000)
+    system.add_product(product1)
+    system.add_product(product2)
+
+    # Placing orders
+    order1 = system.place_order(1, 1, 1)  # John Doe orders 1 Laptop
+    order2 = system.place_order(2, 2, 2)  # Jane Smith orders 2 Smartphones
+
+    # Tracking orders
+    system.track_order(1)
+    system.track_order(2)
+
+    # Starting delivery
+    system.start_delivery(1)  # Delivering order 1
+    system.start_delivery(2)  # Delivering order 2
+
+
+if __name__ == "__main__":
+    main()
+
